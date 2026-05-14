@@ -2,10 +2,13 @@
 #include "peripherals/mini_uart.h"
 #include "peripherals/gpio.h"
 
+#define BAUD_RATE 115200
+#define CLOCK_FREQ 500000000
+
 void uart_send ( char c )
 {
 	while(1) {
-		if(get32(AUX_MU_LSR_REG)&0x20) 
+		if(get32(AUX_MU_LSR_REG)&0x20) // this is important, if the transmitter is empty hence, fifo can accept a byte, we break this loop
 			break;
 	}
 	put32(AUX_MU_IO_REG,c);
@@ -57,7 +60,7 @@ void uart_init ( void )
 	put32(AUX_MU_IER_REG,0);                //Disable receive and transmit interrupts
 	put32(AUX_MU_LCR_REG,3);                //Enable 8 bit mode
 	put32(AUX_MU_MCR_REG,0);                //Set RTS line to be always high
-	put32(AUX_MU_BAUD_REG,541);             //Set baud rate to 115200
+	put32(AUX_MU_BAUD_REG,CLOCK_FREQ/(8*BAUD_RATE)-1);             //Set baud rate to 115200
 
 	put32(AUX_MU_CNTL_REG,3);               //Finally, enable transmitter and receiver
 }
